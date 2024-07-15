@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script>
+        async function sha256(message) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(message);
+            const buffer = await crypto.subtle.digest("SHA-256", data)
+            return window.btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(buffer))));
+        }
+
+        async function sendPassword(password) {
+            const response = await fetch('<%= loginUrl %>', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password: await sha256(password)})
+            })
+            if (!response.ok) {
+                return {message: 'Internal server error', success: false}
+            }
+
+            const message = await response.text()
+            return {message: message, success: response.status === 200}
+        }
+
+        function random(x, y) {
+            const min = Math.min(x, y);
+            const max = Math.max(x, y)
+            return Math.floor(Math.random() * (max - min) + min)
+        }
+
+        async function sleep(time) {
+            return new Promise((resolve, reject) => {
+                setTimeout(resolve, time)
+            })
+        }
+
+        async function* dots(string, cnt = random(3, 9)) {
+            for (let i = 0; i < cnt; i++) {
+                yield string + '.'.repeat(i % 3 + 1)
+                await sleep(random(100, 500))
+            }
+        }
+
+        async function statusProcess(status, start, end) {
+            for await (const string of dots(start)) {
+                status(string, 9)
+            }
+            status(end)
+        }
+
+        async function makeLog(status, progress, messages) {
+            const interval = setInterval(() => progress(random(0, 100)), 100)
+            for (const message of messages) {
+                await statusProcess(status, ...message)
+                await sleep(1000)
+            }
+            clearInterval(interval)
+            progress(100)
+        }
+
+        async function loginAccessDeniedLog(status, progress) {
+            await makeLog(status, progress, [
+                ['Hashing password', 'Password has been hashed'],
+                ['Sending password to server', 'Password has been sent'],
+                ['Verifying password', 'Access denied']
+            ])
+            await sleep(1000)
+        }
+
+        async function loginAccessConfirmedLog(status, progress) {
+            await makeLog(status, progress, [
+                ['Hashing password', 'Password has been hashed'],
+                ['Sending password to server', 'Password has been sent'],
+                ['Verifying password', 'Password has been verified'],
+                ['Adding user to database', 'User has been added'],
+                ['Creating and signing token', 'Token has been created and signed'],
+                ['Sending token to user', 'Token has been sent'],
+                ['Checking device compatability', 'Device is compatible'],
+                ['Checking device for viruses', 'There are no viruses'],
+                ['Connecting with stars in the Milky Way', 'Successfully connected'],
+                ['Asking Elon Musk to grant access', 'Access has been granted'],
+                ['Redirecting', 'Successfully redirected'],
+            ])
+            await sleep(1100)
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const passwordElement = document.getElementById('password')
+            const statusElement = document.getElementById('status')
+            const progressDiv = document.getElementById('progress-div')
+            const progressElement = document.getElementById('progress')
+
+            const status = (string) => statusElement.innerText = string
+            const progress = (width) => progressElement.style.width = `${width}%`
+            window.addEventListener('keyup', async e => {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    if (passwordElement.disabled) {
+                        window.location = '<%= redirectUrl %>'
+                        return
+                    }
+
+                    progress(0)
+                    progressDiv.style.display = 'block'
+                    const {message, success} = await sendPassword(passwordElement.value)
+                    passwordElement.disabled = true
+                    if (success) {
+                        await loginAccessConfirmedLog(status, progress)
+                        window.location = '<%= redirectUrl %>'
+                    } else {
+                        await loginAccessDeniedLog(status, progress)
+                        statusElement.innerText = message
+                        progressDiv.style.display = 'none'
+                        passwordElement.disabled = false
+                    }
+                }
+            })
+        })
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, serif;
+        }
+
+        .container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        label {
+            font-size: 18pt;
+            margin: 7px;
+
+        }
+
+        input {
+            font-size: 14pt;
+            margin: 7px;
+            padding: 5px;
+            border: solid 1px black;
+            border-radius: 5px;
+        }
+
+        .progress-bar {
+            margin: 10px;
+            width: 30%;
+            background-color: #e0e0e0;
+            padding: 3px;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
+        }
+
+        .progress-bar-fill {
+            display: block;
+            height: 15px;
+            background-color: #659cef;
+            border-radius: 8px;
+            transition: width 500ms ease-in-out;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        h1 {
+            font-weight: normal;
+            font-size: 25pt;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 id="status">Enter password</h1>
+    <div id="progress-div" style="display: none" class="progress-bar">
+        <span id="progress" class="progress-bar-fill" style="width: 0;"></span>
+    </div>
+    <div>
+        <label for="password">PASSWORD</label>
+        <input id="password"/>
+    </div>
+</div>
+</body>
+</html>

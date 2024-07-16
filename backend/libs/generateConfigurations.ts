@@ -14,8 +14,15 @@ export default function generateConfigurations() {
   config.forEach((site) => {
     if (site.protected) {
       SITES[site.name] = proxy(site.proxyPass, {
+        proxyReqPathResolver: function (req) {
+          return req.originalUrl;
+        },
         proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
-          proxyReqOpts.headers = {"Connection": "keep-alive"};
+          if (proxyReqOpts.headers) {
+            proxyReqOpts.headers['Upgrade'] = srcReq.headers['upgrade'] || '';
+            proxyReqOpts.headers['Connection'] = srcReq.headers['connection'] || '';
+            proxyReqOpts.headers['Host'] = srcReq.headers['host'];
+          }
           return proxyReqOpts;
         }
       })

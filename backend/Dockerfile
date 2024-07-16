@@ -16,6 +16,7 @@ RUN addgroup --gid 1001 --system app && \
     chown -R 1001:1001 /app
 
 USER app
+STOPSIGNAL SIGINT
 
 COPY --from=builder /app/build /app
 ENTRYPOINT ["node", "index.js"]

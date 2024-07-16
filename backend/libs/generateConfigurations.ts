@@ -15,14 +15,14 @@ export default function generateConfigurations() {
     if (site.protected) {
       SITES[site.name] = proxy(site.proxyPass)
     } else {
-      createNginxConf(site.name, site.serverName, site.sslCertificate, site.proxyPass, nginxConfDirectory)
+      createNginxConf(site.name, site.serverName, site.sslCertificate, site.sslCertificateKey, site.proxyPass, nginxConfDirectory)
     }
   })
 
   return SITES
 }
 
-function createNginxConf(name: string, serverName: string, sslCertificate: string, proxyPass: string, confDir: string) {
+function createNginxConf(name: string, serverName: string, sslCertificate: string, sslCertificateKey: string, proxyPass: string, confDir: string) {
   if (!fs.existsSync(confDir)) {
     fs.mkdirSync(confDir)
   }
@@ -31,8 +31,8 @@ function createNginxConf(name: string, serverName: string, sslCertificate: strin
 server {
     listen 443 ssl;
     server_name ${serverName};
-    ssl_certificate /etc/letsencrypt/live/${sslCertificate}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${sslCertificate}/privkey.pem;
+    ssl_certificate ${sslCertificate};
+    ssl_certificate_key ${sslCertificateKey};
 
     location / {
         proxy_pass ${proxyPass};

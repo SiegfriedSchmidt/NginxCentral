@@ -4,4 +4,5 @@ export type configType = Array<{
   "protected": boolean,
   "serverName": string,
   "sslCertificate": string
+  "sslCertificateKey": string
 }>

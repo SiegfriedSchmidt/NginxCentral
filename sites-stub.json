@@ -1,0 +1,10 @@
+[
+  {
+    "name": "protected.noons.ru",
+    "proxyPass": "http://central-nginx-backend:9449",
+    "protected": false,
+    "serverName": "www.protected.noons.ru, protected.noons.ru",
+    "sslCertificate": "/etc/ssl/default-ssl.crt",
+    "sslCertificateKey": "/etc/ssl/default-ssl.key"
+  }
+]

@@ -10,20 +10,17 @@ import path from "path";
 import generateRandom from "./utils/generateRandom";
 import {readFileSync} from "fs";
 import proxyToSiteMiddleware from "./middlewares/proxyToSiteMiddleware";
-import proxy from "express-http-proxy";
 import cookieParser from "cookie-parser";
 import * as ejs from "ejs"
 import NoCacheHeadersMiddleware from "./middlewares/NoCacheHeadersMiddleware";
+import generateConfigurations from "./generateConfigurations";
+
+export const SITES = generateConfigurations()
 
 const PORT = Number(process.env.PORT) || 9449
 const ENV = process.env.NODE_ENV || 'development';
 const PROTOCOL = ENV === 'development' ? "https" : "http"
 const HOSTNAME = ENV === 'development' ? "192.168.1.15" : "0.0.0.0"
-
-export const SITES: { [key: string]: RequestHandler } = {
-  'hse': proxy('https://hse.noons.ru'),
-  'reminder': proxy('https://reminder.noons.ru')
-}
 
 // proxy('https://google.com', {
 //   proxyReqOptDecorator: function (proxyReqOpts, srcReq) {

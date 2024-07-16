@@ -1,0 +1,7 @@
+.idea
+node_modules
+dist
+certs
+build
+DS_STORE
+.dockerignore

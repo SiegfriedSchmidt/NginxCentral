@@ -11,7 +11,9 @@ import generateRandom from "./utils/generateRandom";
 import {readFileSync} from "fs";
 import proxyToSiteMiddleware from "./middlewares/proxyToSiteMiddleware";
 import proxy from "express-http-proxy";
+import cookieParser from "cookie-parser";
 import * as ejs from "ejs"
+import NoCacheHeadersMiddleware from "./middlewares/NoCacheHeadersMiddleware";
 
 const PORT = Number(process.env.PORT) || 9449
 const ENV = process.env.NODE_ENV || 'development';
@@ -22,6 +24,17 @@ export const SITES: { [key: string]: RequestHandler } = {
   'hse': proxy('https://hse.noons.ru'),
   'reminder': proxy('https://reminder.noons.ru')
 }
+
+// proxy('https://google.com', {
+//   proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+//     if (proxyReqOpts && proxyReqOpts.headers) {
+//       proxyReqOpts.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate';
+//       proxyReqOpts.headers['Pragma'] = 'no-cache';
+//       proxyReqOpts.headers['Expires'] = '0';
+//     }
+//     return proxyReqOpts
+//   }
+// })
 
 export const noRegisterUrls = ['/express-proxy-auth/login-page', '/express-proxy-auth/login']
 export const STATIC = path.join(__dirname, '../html')
@@ -48,7 +61,7 @@ app.engine('html', ejs.renderFile);
 // middleware
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
-// app.use(cookieParser())
+app.use(cookieParser())
 
 // my middleware
 app.use(loggerMiddleware)
@@ -59,6 +72,7 @@ app.use(restrictAccessMiddleware)
 app.use('/express-proxy-auth', mainRouter)
 
 // sites
+app.use(NoCacheHeadersMiddleware);
 app.use(proxyToSiteMiddleware)
 
 server.listen(PORT, HOSTNAME, () => console.info(`Server running on ${PROTOCOL}://${HOSTNAME}:${PORT} in ${ENV} mode`));

@@ -22,7 +22,7 @@ const ENV = process.env.NODE_ENV || 'development';
 const PROTOCOL = ENV === 'development' ? "https" : "http"
 const HOSTNAME = ENV === 'development' ? "192.168.1.15" : "0.0.0.0"
 
-// proxy('https://x.com', {
+// proxy('https://google.com', {
 //   proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
 //     if (proxyReqOpts && proxyReqOpts.headers) {
 //       proxyReqOpts.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate';

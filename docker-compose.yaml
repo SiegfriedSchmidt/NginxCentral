@@ -23,7 +23,7 @@ services:
   central-nginx-backend:
     platform: linux/amd64
     build: ./backend
-    mage: siegfriedschmidt/central-nginx-backend
+    image: siegfriedschmidt/central-nginx-backend
     container_name: central-nginx-backend
     environment:
       - PORT=9449

@@ -13,7 +13,12 @@ export default function generateConfigurations() {
 
   config.forEach((site) => {
     if (site.protected) {
-      SITES[site.name] = proxy(site.proxyPass)
+      SITES[site.name] = proxy(site.proxyPass, {
+        proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+          proxyReqOpts.headers = {"Connection": "keep-alive"};
+          return proxyReqOpts;
+        }
+      })
     } else {
       createNginxConf(site.name, site.serverName, site.sslCertificate, site.sslCertificateKey, site.proxyPass, nginxConfDirectory)
     }

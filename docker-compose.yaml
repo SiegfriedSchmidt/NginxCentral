@@ -11,6 +11,12 @@ services:
       - ./central-nginx-data/conf.d:/etc/nginx/conf.d:ro
       - ./central-nginx-data/certbot/etc:/etc/letsencrypt:ro
       - ./central-nginx-data/certbot/www:/var/www/certbot:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "service nginx status || exit 1" ]
+      interval: 86400s
+      start_period: 10s
+      start_interval: 5s
+      retries: 5
     depends_on:
       central-nginx-backend:
         condition: service_healthy

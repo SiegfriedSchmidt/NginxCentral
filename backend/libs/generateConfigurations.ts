@@ -24,6 +24,11 @@ export default function generateConfigurations() {
             proxyReqOpts.headers['Host'] = srcReq.headers['host'];
           }
           return proxyReqOpts;
+        },
+        userResHeaderDecorator: function (headers) {
+          headers['Access-Control-Allow-Origin'] = 'https://protected.noons.ru';
+          headers['Access-Control-Allow-Credentials'] = 'true';
+          return headers;
         }
       })
     } else {

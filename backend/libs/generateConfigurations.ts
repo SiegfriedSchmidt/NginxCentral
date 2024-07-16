@@ -27,7 +27,7 @@ function createNginxConf(name: string, serverName: string, sslCertificate: strin
     fs.mkdirSync(confDir)
   }
 
-  fs.writeFileSync(path.join(confDir, `${name}.conf.template`), `
+  fs.writeFileSync(path.join(confDir, `${name}.conf`), `
 server {
     listen 443 ssl;
     server_name ${serverName};

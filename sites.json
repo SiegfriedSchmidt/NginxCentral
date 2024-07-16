@@ -1,0 +1,23 @@
+[
+  {
+    "name": "protected.noons.ru",
+    "proxyPass": "http://central-nginx-backend:9449",
+    "protected": false,
+    "serverName": "www.protected.noons.ru, protected.noons.ru",
+    "sslCertificate": "noons.ru"
+  },
+  {
+    "name": "hse.noons.ru",
+    "proxyPass": "http://reminder-frontend:10000",
+    "protected": false,
+    "serverName": "www.hse.noons.ru, hse.noons.ru",
+    "sslCertificate": "noons.ru"
+  },
+  {
+    "name": "reminder.noons.ru",
+    "proxyPass": "http://reminder-frontend:10000",
+    "protected": false,
+    "serverName": "www.reminder.noons.ru, reminder.noons.ru",
+    "sslCertificate": "noons.ru"
+  }
+]

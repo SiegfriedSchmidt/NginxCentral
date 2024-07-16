@@ -1,0 +1,59 @@
+services:
+  central-nginx-main:
+    platform: linux/amd64
+    build: ./main-nginx
+    image: siegfriedschmidt/central-nginx-main
+    container_name: central-nginx-main
+    ports:
+      - 80:80/tcp
+      - 443:443/tcp
+    volumes:
+      - ./central-nginx-data/conf.d:/etc/nginx/conf.d:ro
+      - ./central-nginx-data/certbot/etc:/etc/letsencrypt:ro
+      - ./central-nginx-data/certbot/www:/var/www/certbot:ro
+    depends_on:
+      central-nginx-backend:
+        condition: service_healthy
+    networks:
+      - default
+      - reminder-external-network
+      - hse-monitor-external-network
+    restart: unless-stopped
+
+  central-nginx-backend:
+    platform: linux/amd64
+    build: ./backend
+    mage: siegfriedschmidt/central-nginx-backend
+    container_name: central-nginx-backend
+    environment:
+      - PORT=9449
+      - NODE_ENV=production
+      - PASSWORD=notdefined
+      - CONF_FILE=/app/sites.json
+      - NGINX_CONF_DIRECTORY=/central-nginx-data/conf.d
+    volumes:
+      - ./central-nginx-data/conf.d:/central-nginx-data/conf.d
+      - ./sites.json:/app/sites.json:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9449 || exit 1" ]
+      interval: 86400s
+      start_period: 10s
+      start_interval: 5s
+      retries: 5
+    networks:
+      - default
+    restart: unless-stopped
+
+  central-nginx-certbot:
+    image: certbot/certbot
+    container_name: central-nginx-certbot
+    command: certonly --reinstall --webroot --webroot-path=/var/www/certbot --email admin@mail.ru --agree-tos --no-eff-email --cert-name noons.ru -d reminder.noons.ru -d hse.noons.ru -d protected.noons.hse
+    volumes:
+      - ./central-nginx-data/certbot/etc:/etc/letsencrypt
+      - ./central-nginx-data/certbot/www:/var/www/certbot
+
+networks:
+  reminder-external-network:
+    external: true
+  hse-monitor-external-network:
+    external: true
